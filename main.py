@@ -9,22 +9,15 @@ topic_tree =  {
     "id": "home",
     "title": "Home",
     "children": [
-        {
-            "id": "math",
-            "title": "Math",
-            "children": [
-                {"id": "addition", "title": "Addition", "children": [
-                    {"id":"addition", "title": "lesson1","children":[]},
-                    {"id":"addition", "title": "lesson2","children":[]},
-                ]},
-                {"id": "subtraction", "title": "Subtraction", "children": []},
-            ],
-        },
+
         {
             "id": "csci",
             "title": "CSCI",
             "children": [
-                {"id": "basics", "title": "Basics", "children": []},
+                {"id": "basics", "title": "Basics", "children": [
+                    {"id": "introduction", "title": "Introduction", "children": []},
+
+                ]},
                 {"id": "loops", "title": "Loops", "children": []},
                 {"id": "variables", "title": "Variables", "children": []},
             ],
