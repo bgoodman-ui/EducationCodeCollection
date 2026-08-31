@@ -13,7 +13,10 @@ topic_tree =  {
             "id": "math",
             "title": "Math",
             "children": [
-                {"id": "addition", "title": "Addition", "children": []},
+                {"id": "addition", "title": "Addition", "children": [
+                    {"id":"addition", "title": "lesson1","children":[]},
+                    {"id":"addition", "title": "lesson2","children":[]},
+                ]},
                 {"id": "subtraction", "title": "Subtraction", "children": []},
             ],
         },
@@ -21,6 +24,7 @@ topic_tree =  {
             "id": "csci",
             "title": "CSCI",
             "children": [
+                {"id": "basics", "title": "Basics", "children": []},
                 {"id": "loops", "title": "Loops", "children": []},
                 {"id": "variables", "title": "Variables", "children": []},
             ],
