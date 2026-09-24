@@ -1,0 +1,39 @@
+/* Off-canvas nav toggle -- add-on for Strongly Typed */
+#off-canvas-toggle{
+  position:fixed; top:0; left:0; z-index:10001;
+  width:80px; height:80px; border:0; background:none; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+#off-canvas-toggle span, #off-canvas-toggle span:before, #off-canvas-toggle span:after{
+  content:''; display:block; position:absolute; left:26px; width:28px; height:3px;
+  background:#f56a6a; border-radius:2px; transition:transform .3s ease, top .3s ease;
+}
+#off-canvas-toggle span{ top:39px; }
+#off-canvas-toggle span:before{ top:-9px; }
+#off-canvas-toggle span:after{ top:9px; }
+#off-canvas-toggle.is-open span{ background:transparent; }
+#off-canvas-toggle.is-open span:before{ top:0; transform:rotate(45deg); }
+#off-canvas-toggle.is-open span:after{ top:0; transform:rotate(-45deg); }
+
+#off-canvas-nav{
+  position:fixed; top:0; left:0; height:100%; width:320px; max-width:86vw;
+  background:#f5f6f7; box-shadow:0 0 5em rgba(0,0,0,.2);
+  transform:translateX(-100%); transition:transform .45s ease; z-index:10000;
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+#off-canvas-nav.is-open{ transform:translateX(0); }
+#off-canvas-nav .inner{ padding:80px 2em 2em; font-size:15px; }
+#off-canvas-nav section{ border-bottom:solid 2px rgba(210,215,217,.75); margin:0 0 1.75em; padding:0 0 1.75em; }
+#off-canvas-nav section:last-child{ border-bottom:0; margin-bottom:0; padding-bottom:0; }
+#off-canvas-nav ul{ list-style:none; margin:0; padding:0; }
+#off-canvas-nav > .inner > nav > ul > li{ border-top:solid 1px rgba(210,215,217,.75); }
+#off-canvas-nav > .inner > nav > ul > li:first-child{ border-top:0; }
+#off-canvas-nav a, #off-canvas-nav .opener{ display:block; padding:.65em 0; cursor:pointer; color:#3d4449; text-decoration:none; }
+#off-canvas-nav .submenu{ max-height:0; overflow:hidden; transition:max-height .3s ease; padding-left:1em; }
+#off-canvas-nav .opener.active + .submenu{ max-height:20em; }
+
+#off-canvas-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.35); opacity:0; pointer-events:none;
+  transition:opacity .35s ease; z-index:9999;
+}
+#off-canvas-overlay.is-open{ opacity:1; pointer-events:auto; }

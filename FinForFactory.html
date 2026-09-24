@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>For Loop - factory visual</title>
+<style>
+  :root {
+    --bg: #f5f5f5;
+    --fg: #222;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #1b1b1b; --fg: #eee; }
+  }
+  :root[data-theme="dark"] { --bg: #1b1b1b; --fg: #eee; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: system-ui, sans-serif; }
+  #wrap { max-width: 1200px; margin: 0 auto; }
+  canvas { display: block; width: 100%; height: auto; background: #f5f5f5; }
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="c" width="1200" height="800"></canvas></div>
+<script>
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+
+const MAX_ITEMS = 60;
+const ON_MAIN_BELT = 0, ON_SPLITTER_WAIT = 1, ON_VBELT1 = 2, ON_VBELT2 = 3;
+
+const rect = (x, y, w, h) => ({ x, y, w, h });
+const horizontalbelt = (x, y) => rect(x, y, 450, 70);
+const verticalbelt = (x, y) => rect(x, y, 70, 300);
+
+// ---- world setup (same numbers as the C version) ----
+const belt = horizontalbelt(250, 280);
+const beltspeed = 120;
+const stripewidth = 20;
+let stripeOffset = 0;
+
+const machine = rect(150, 240, 100, 150);
+const spawnPoint = { x: machine.x + machine.w, y: belt.y + belt.h / 2 - 15 };
+
+const splitter = rect(belt.x + belt.w, 240, 250, 150);
+let itemsDestroyed = 0;
+let itemsShipped = 0;
+
+const vbelt1 = verticalbelt(splitter.x, splitter.y + splitter.h);
+const vbelt2 = verticalbelt(splitter.x + splitter.w - 70, splitter.y + splitter.h);
+const shredder = rect(vbelt1.x, vbelt1.y + vbelt1.h, 170, 150);
+const shipper = rect(vbelt2.x, vbelt2.y + vbelt2.h, 170, 150);
+
+const items = Array.from({ length: MAX_ITEMS }, () => ({ rect: rect(0, 0, 30, 30), active: false, onBelt: ON_MAIN_BELT }));
+let spawnQueue = 0;
+let spawnTimer = 0;
+const spawnInterval = 0.5;
+
+// ---- input boxes ----
+const box1 = { r: rect(150, 50, 200, 40), text: "", typing: false, label: "How many packages coming in?" };
+const box2 = { r: rect(150, 120, 200, 40), text: "", typing: false, label: "How many need to be destroyed?" };
+
+const mouse = { x: 0, y: 0 };
+const hit = (p, r) => p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
+
+function toCanvas(e) {
+  const b = canvas.getBoundingClientRect();
+  return { x: (e.clientX - b.left) * canvas.width / b.width, y: (e.clientY - b.top) * canvas.height / b.height };
+}
+
+canvas.addEventListener("mousemove", e => {
+  Object.assign(mouse, toCanvas(e));
+  canvas.style.cursor = (hit(mouse, box1.r) || hit(mouse, box2.r)) ? "text" : "default";
+});
+
+canvas.addEventListener("mousedown", e => {
+  Object.assign(mouse, toCanvas(e));
+  box1.typing = hit(mouse, box1.r);
+  box2.typing = hit(mouse, box2.r);
+});
+
+// Assign waiting items a destination.
+// Destroy items release one by one over time, each as its own square.
+// Ship items are collapsed into a single block carrying the whole count,
+// which travels down the ship belt as one square.
+const releaseQueue = [];
+const shipBlocks = []; // { rect, count } -- already placed on the belt, moving
+const pendingShip = []; // counts waiting for the shredder queue to finish first
+let releaseTimer = 0;
+let shipCooldown = 0;
+
+function placeOnBelt(it) {
+  const vb = it.dest === ON_VBELT1 ? vbelt1 : vbelt2;
+  it.onBelt = it.dest;
+  it.rect.x = vb.x + (vb.w - it.rect.w) / 2;
+  it.rect.y = vb.y;
+}
+
+function sendWaitingItems(destroyCount) {
+  let left = destroyCount;
+  const destroy = [];
+  let shipCount = 0;
+  for (const it of items) {
+    if (it.active && it.onBelt === ON_SPLITTER_WAIT && !it.queued) {
+      it.queued = true;
+      if (left > 0) {
+        it.dest = ON_VBELT1;
+        destroy.push(it);
+        left--;
+      } else {
+        it.active = false; // no longer drawn as its own square
+        shipCount++;
+      }
+    }
+  }
+  releaseQueue.push(...destroy);
+  if (shipCount > 0) pendingShip.push(shipCount);
+}
+
+function releaseNext() {
+  placeOnBelt(releaseQueue.shift());
+}
+
+window.addEventListener("keydown", e => {
+  const box = box1.typing ? box1 : box2.typing ? box2 : null;
+  if (!box) return;
+
+  if (e.key >= "0" && e.key <= "9" && e.key.length === 1 && box.text.length < 7) {
+    box.text += e.key;
+  } else if (e.key === "Backspace") {
+    box.text = box.text.slice(0, -1);
+    e.preventDefault();
+  } else if (e.key === "Enter" && box.text.length > 0) {
+    const n = parseInt(box.text, 10);
+    if (box === box1) {
+      if (n > 0) spawnQueue += n;
+    } else {
+      sendWaitingItems(n);
+    }
+    box.text = "";
+    box.typing = false;
+  }
+});
+
+// ---- update ----
+function moveItem(it, dt) {
+  switch (it.onBelt) {
+    case ON_MAIN_BELT:
+      it.rect.x += beltspeed * dt;
+      if (it.rect.x > belt.x + belt.w) {
+        it.onBelt = ON_SPLITTER_WAIT;
+        it.rect.x = splitter.x + (splitter.w - it.rect.w) / 2;
+        it.rect.y = splitter.y + (splitter.h - it.rect.h) / 2;
+      }
+      break;
+    case ON_SPLITTER_WAIT:
+      break; // waits until the user enters a destroy count
+    case ON_VBELT1:
+      it.rect.y += beltspeed * dt;
+      if (it.rect.y > vbelt1.y + vbelt1.h) { it.active = false; itemsDestroyed++; }
+      break;
+  }
+}
+
+let beltRunning = false;
+let waitingAtSplitter = 0;
+
+function update(dt) {
+  if (spawnQueue > 0) {
+    spawnTimer += dt;
+    if (spawnTimer >= spawnInterval) {
+      spawnTimer = 0;
+      const slot = items.find(i => !i.active);
+      if (slot) {
+        slot.active = true;
+        slot.rect = rect(spawnPoint.x, spawnPoint.y, 30, 30);
+        slot.onBelt = ON_MAIN_BELT;
+        slot.queued = false;
+        spawnQueue--;
+      }
+    }
+  }
+
+  const destroyItemsInFlight = items.some(i => i.active && i.onBelt === ON_VBELT1);
+
+  if (releaseQueue.length > 0) {
+    releaseTimer += dt;
+    if (releaseTimer >= spawnInterval) { releaseTimer = 0; releaseNext(); }
+    shipCooldown = 0;
+  } else if (destroyItemsInFlight) {
+    // last destroy squares are still traveling down to the shredder
+    shipCooldown = 0;
+  } else if (pendingShip.length > 0) {
+    // shredder is fully done and emptied -- hold the same cooldown gap, then ship
+    shipCooldown += dt;
+    if (shipCooldown >= spawnInterval) {
+      shipCooldown = 0;
+      const count = pendingShip.shift();
+      shipBlocks.push({ rect: rect(vbelt2.x + (vbelt2.w - 30) / 2, vbelt2.y, 30, 30), count });
+    }
+  } else {
+    releaseTimer = spawnInterval; // next item drops immediately
+  }
+
+  beltRunning = items.some(i => i.active) || spawnQueue > 0 || shipBlocks.length > 0 || releaseQueue.length > 0 || pendingShip.length > 0;
+  if (beltRunning) stripeOffset = (stripeOffset + beltspeed * dt) % (stripewidth * 2);
+
+  for (const it of items) if (it.active) moveItem(it, dt);
+  waitingAtSplitter = items.filter(i => i.active && i.onBelt === ON_SPLITTER_WAIT).length;
+
+  for (let i = shipBlocks.length - 1; i >= 0; i--) {
+    const b = shipBlocks[i];
+    b.rect.y += beltspeed * dt;
+    if (b.rect.y > vbelt2.y + vbelt2.h) {
+      itemsShipped += b.count;
+      shipBlocks.splice(i, 1);
+    }
+  }
+}
+
+// ---- drawing ----
+const DARKGRAY = "#505050", GRAY = "#828282", LIGHTGRAY = "#c8c8c8", ORANGE = "#ffa100";
+const RAYWHITE = "#f5f5f5", MAROON = "#be2837";
+
+function fillRect(r, color) { ctx.fillStyle = color; ctx.fillRect(r.x, r.y, r.w, r.h); }
+function strokeRect(r, thick, color) {
+  ctx.strokeStyle = color; ctx.lineWidth = thick;
+  ctx.strokeRect(r.x + thick / 2, r.y + thick / 2, r.w - thick, r.h - thick);
+}
+function text(str, x, y, size, color) {
+  ctx.fillStyle = color; ctx.font = size + "px sans-serif"; ctx.textBaseline = "top";
+  ctx.fillText(str, x, y);
+}
+function measure(str, size) { ctx.font = size + "px sans-serif"; return ctx.measureText(str).width; }
+
+function drawStripedBelt(r, horizontal) {
+  fillRect(r, DARKGRAY);
+  ctx.save();
+  ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
+  ctx.fillStyle = beltRunning ? GRAY : LIGHTGRAY;
+  if (horizontal) {
+    for (let x = r.x - stripewidth * 2 + stripeOffset; x < r.x + r.w; x += stripewidth * 2)
+      ctx.fillRect(x, r.y, stripewidth, r.h);
+  } else {
+    for (let y = r.y - stripewidth * 2 + stripeOffset; y < r.y + r.h; y += stripewidth * 2)
+      ctx.fillRect(r.x, y, r.w, stripewidth);
+  }
+  ctx.restore();
+  strokeRect(r, 2, "#000");
+}
+
+function drawInput(b) {
+  fillRect(b.r, b.typing ? "#e0eefb" : LIGHTGRAY);
+  strokeRect(b.r, 2, b.typing ? "#0079f1" : GRAY);
+  text(b.text + (b.typing && Math.floor(performance.now() / 500) % 2 ? "|" : ""), b.r.x + 10, b.r.y + 10, 20, "#000");
+  text(b.label, b.r.x, b.r.y - 20, 14, DARKGRAY);
+}
+
+function draw() {
+  fillRect(rect(0, 0, canvas.width, canvas.height), RAYWHITE);
+
+  fillRect(machine, DARKGRAY);
+  text("MACHINE", machine.x + 5, machine.y + machine.h / 2 - 10, 14, RAYWHITE);
+
+  fillRect(splitter, DARKGRAY);
+  text("SPLITTER", splitter.x + 5, splitter.y + 10, 14, RAYWHITE);
+  text("Waiting: " + waitingAtSplitter, splitter.x + 5, splitter.y + splitter.h / 2, 16, RAYWHITE);
+
+  drawStripedBelt(belt, true);
+  drawStripedBelt(vbelt1, false);
+  drawStripedBelt(vbelt2, false);
+
+  fillRect(shredder, DARKGRAY);
+  text("Shredder", shredder.x + 5, shredder.y + 10, 14, RAYWHITE);
+  text("DESTROY", shredder.x + 5, shredder.y + 28, 14, RAYWHITE);
+  text(String(itemsDestroyed), shredder.x + 5 + measure("DESTROY", 14) + 8, shredder.y + 28, 18, RAYWHITE);
+
+  fillRect(shipper, DARKGRAY);
+  text("Shipper", shipper.x + 5, shipper.y + 10, 14, RAYWHITE);
+  text("Shippable", shipper.x + 5, shipper.y + 28, 14, RAYWHITE);
+  text(String(itemsShipped), shipper.x + 5 + measure("Shippable", 14) + 8, shipper.y + 28, 18, RAYWHITE);
+
+  for (const it of items) if (it.active) fillRect(it.rect, ORANGE);
+
+  for (const b of shipBlocks) {
+    fillRect(b.rect, ORANGE);
+    strokeRect(b.rect, 2, "#000");
+    const label = String(b.count);
+    text(label, b.rect.x + b.rect.w / 2 - measure(label, 14) / 2, b.rect.y + b.rect.h / 2 - 7, 14, "#000");
+  }
+
+  drawInput(box1);
+  drawInput(box2);
+
+  if (spawnQueue > 0) text("Shipping " + spawnQueue + " more...", 150, 200, 20, MAROON);
+}
+
+// ---- main loop (the equivalent of while(!WindowShouldClose())) ----
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.1); // clamp so a background tab doesn't cause a huge jump
+  last = now;
+  update(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
