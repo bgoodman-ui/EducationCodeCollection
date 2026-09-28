@@ -1526,6 +1526,13 @@ input, select, textarea {
 				width: auto;
 			}
 
+		/* image caption space between images*/
+			.image-caption {
+				text-align: center;
+				margin-top: -0.70em;
+
+			}
+
 /* Mini Posts */
 .mini-posts article {
 	border-top: solid 1px rgba(210, 215, 217, 0.75);
