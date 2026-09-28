@@ -61,5 +61,7 @@
 					target: $body,
 					visibleClass: 'navPanel-visible'
 				});
+//toggleable submenu logic
+
 
 })(jQuery);
