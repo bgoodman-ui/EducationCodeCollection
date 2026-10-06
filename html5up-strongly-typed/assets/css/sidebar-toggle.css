@@ -1,10 +1,12 @@
 /* Off-canvas nav toggle -- add-on for Strongly Typed */
 #off-canvas-toggle{
   position:fixed; top:0; left:0; z-index:10001;
-  width:80px; height:80px; padding:0; border:0; background:transparent;
-  box-shadow:none; cursor:pointer;
+  width:130px; height:80px; padding:0; border:0;
+  background:transparent;
+  box-shadow:none; cursor:pointer; transition:background .3s ease;
   -webkit-tap-highlight-color:transparent;
 }
+#off-canvas-toggle.is-open{ background:transparent; }
 #off-canvas-toggle:before{
   content:''; position:absolute; top:0; left:0; z-index:-1;
   width:min(320px, 86vw); height:80px; background:#f5f6f7;
@@ -17,11 +19,15 @@
   content:''; display:block; position:absolute; left:26px; width:28px; height:3px;
   background:#f56a6a; border-radius:2px; transition:transform .3s ease, top .3s ease;
 }
-#off-canvas-toggle span{ top:39px; background:transparent; }
-#off-canvas-toggle span:before{ top:-9px; }
-#off-canvas-toggle span:after{ top:9px; }
-#off-canvas-toggle.is-open span:before{ top:0; transform:rotate(45deg); }
-#off-canvas-toggle.is-open span:after{ top:0; transform:rotate(-45deg); }
+#off-canvas-toggle span{
+  top:15px; left:15px; width:50px; height:50px;
+  background:#f5f6f7; border-radius:50%;
+}
+#off-canvas-toggle span:before{ left:11px; top:15px; }
+#off-canvas-toggle span:after{ left:11px; top:33px; }
+#off-canvas-toggle.is-open span{ background:transparent; }
+#off-canvas-toggle.is-open span:before{ top:24px; transform:rotate(45deg); }
+#off-canvas-toggle.is-open span:after{ top:24px; transform:rotate(-45deg); }
 
 #off-canvas-nav{
   position:fixed; top:0; left:0; height:100%; width:320px; max-width:86vw;
