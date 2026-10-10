@@ -21,8 +21,15 @@
   nav.querySelectorAll('.opener').forEach(function(op){
     op.addEventListener('click', function(){
       var wasActive = op.classList.contains('active');
-      nav.querySelectorAll('.opener').forEach(function(o){ o.classList.remove('active'); });
-      op.classList.toggle('active', !wasActive);
+      nav.querySelectorAll('.opener').forEach(function(o){
+        var isExpanded = o === op && !wasActive;
+        var submenu = document.getElementById(o.getAttribute('aria-controls'));
+
+        o.classList.toggle('active', isExpanded);
+        o.setAttribute('aria-expanded', isExpanded);
+        submenu.setAttribute('aria-hidden', !isExpanded);
+        submenu.toggleAttribute('inert', !isExpanded);
+      });
     });
   });
 })();

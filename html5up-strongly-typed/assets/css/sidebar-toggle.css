@@ -43,7 +43,10 @@
 #off-canvas-nav ul{ list-style:none; margin:0; padding:0; }
 #off-canvas-nav > .inner > nav > ul > li{ border-top:solid 1px rgba(210,215,217,.75); }
 #off-canvas-nav > .inner > nav > ul > li:first-child{ border-top:0; }
-#off-canvas-nav a, #off-canvas-nav .opener{ display:block; padding:.65em 0; cursor:pointer; color:#3d4449; text-decoration:none; }
+#off-canvas-nav a, #off-canvas-nav .opener{ display:block; width:100%; padding:.65em 0; cursor:pointer; color:#3d4449 !important; text-decoration:none; text-align:left; }
+#off-canvas-nav .opener{ position:static; border:0; border-radius:0; background:transparent; box-shadow:none; font:inherit; letter-spacing:normal; text-transform:none; transition:none; }
+#off-canvas-nav .opener:after{ content:'+'; float:right; }
+#off-canvas-nav .opener.active:after{ content:'-'; }
 #off-canvas-nav .submenu{ max-height:0; overflow:hidden; transition:max-height .3s ease; padding-left:1em; }
 #off-canvas-nav .opener.active + .submenu{ max-height:20em; }
 

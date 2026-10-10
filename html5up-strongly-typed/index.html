@@ -5,157 +5,70 @@
     Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 -->
 <html>
-<head>
-    <title>Strongly Typed by HTML5 UP</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <link rel="stylesheet" href="assets/css/main.css" />
-    <link rel="stylesheet" href="assets/css/sidebar-toggle.css" />
-</head>
-<body class="homepage is-preload">
-    <button id="off-canvas-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span></button>
-    <div id="off-canvas-overlay"></div>
-    <div id="off-canvas-nav" aria-hidden="true">
-        <div class="inner">
-            <nav>
-                <h2>Menu</h2>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="3rdGrade.html">3rd Grade</a></li>
-                    
-                </ul>
-            </nav>
-        </div>
-    </div>
-    <div id="page-wrapper">
-
-        <!-- Header -->
-        <section id="header">
-            <div class="container">
-
-                <!-- Logo -->
-                <h1 id="logo"><a href="index.html"><span>Computer Science</span><span>Lesson Ideas</span></a></h1>
-                <p>Aiding Educators Develop Computer Science Skills.</p>
-
-                <!-- Mini Posts -->
-                <section>
-                    <header class="major">
-                        <h2>Ante interdum</h2>
-                    </header>
-                    <div class="row gtr-uniform aln-center">
-                            <div class="col-6 col-12-small">
-                                <a href="#" class="image"><img src="images/pic02.jpg" alt="" /></a>
-                                <h3 class="image-caption"> Introductory Page</p>
-                            </div>
-                    </div>
-                    <div class = "row gtr-uniform">
-                        <div class="col-6 col-12-small">
-                            <a href="#" class="image"><img src="images/pic01.jpg" alt="" /></a>
-                            <h3 class="image-caption"> First Thing</p>
-                        </div>
-                        <div class="col-6 col-12-small">
-                            <a href="#" class="image"><img src="images/pic03.jpg" alt="" /></a>
-                            <h3 class="image-caption"> Second Thing</p>
-                        </div>    
-                    </div>
-                    <ul class="actions">
-                        <li><a href="#" class="button">More</a></li>
+    <head>
+        <title>Strongly Typed by HTML5 UP</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <!-- Load the site's main styles and the off-canvas menu styles. -->
+        <link rel="stylesheet" href="assets/css/main.css" />
+        <link rel="stylesheet" href="assets/css/sidebar-toggle.css" />
+    </head>
+    <body class="homepage is-preload">
+        <!-- Button that opens and closes the side menu. -->
+        <button id="off-canvas-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span></button>
+        <!-- Dark backdrop that closes the menu when clicked. -->
+        <div id="off-canvas-overlay"></div>
+        <!-- Off-canvas navigation with expandable grade links. -->
+        <div id="off-canvas-nav" aria-hidden="true">
+            <div class="inner">
+                <nav>
+                    <h2>Menu</h2>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li>
+                            <button class="opener" type="button" aria-expanded="false" aria-controls="third-grade-submenu">3rd Grade</button>
+                            <ul class="submenu" id="third-grade-submenu" aria-hidden="true" inert>
+                                <li><a href="3rdGrade.html">Overview</a></li>
+                                <li><a href="3rdGradeMath.html">Math</a></li>
+                            </ul>
+                        </li>
                     </ul>
-                </section>
-
+                </nav>
             </div>
-        </section>
+        </div>
 
-        <!-- Features -->
-        <section id="features">
-            <div class="container">
-                <header>
-                    <h2>Gentlemen, behold! This is <strong>Strongly Typed</strong>!</h2>
-                </header>
-                <div class="row aln-center">
-                    <div class="col-4 col-6-medium col-12-small">
-
-                        <!-- Feature -->
-                        <section>
-                            <a href="#" class="image featured"><img src="images/pic01.jpg" alt="" /></a>
-                            <header>
-                                <h3>Okay, so what is this?</h3>
-                            </header>
-                            <p>
-                                This is <strong>Strongly Typed</strong>, a free, fully responsive site template
-                                by <a href="http://html5up.net">HTML5 UP</a>. Free for personal and commercial use under the
-                                <a href="http://html5up.net/license">CCA 3.0 license</a>.
-                            </p>
-                        </section>
-
-                    </div>
-                    <div class="col-4 col-6-medium col-12-small">
-
-                        <!-- Feature -->
-                        <section>
-                            <a href="#" class="image featured"><img src="images/pic02.jpg" alt="" /></a>
-                            <header>
-                                <h3>Nice! What is HTML5 UP?</h3>
-                            </header>
-                            <p>
-                                <a href="http://html5up.net">HTML5 UP</a> is a side project of <a href="http://twitter.com/ajlkn">AJ’s</a> (= me).
-                                I started it as a way to both test my responsive tools and sharpen up my coding
-                                and design skills a bit.
-                            </p>
-                        </section>
-
-                    </div>
-                    <div class="col-4 col-6-medium col-12-small">
-
-                        <!-- Feature -->
-                        <section>
-                            <a href="#" class="image featured"><img src="images/pic03.jpg" alt="" /></a>
-                            <header>
-                                <h3>What's this built with?</h3>
-                            </header>
-                            <p>
-                                <strong>Responsive Tools</strong> is a simple set of tools for building responsive
-                                sites and apps. All of my templates at <a href="http://html5up.net">HTML5 UP</a> are built using these tools.
-                            </p>
-                        </section>
-
-                    </div>
-                    <div class="col-12">
-                        <ul class="actions">
-                            <li><a href="#" class="button icon solid fa-file">Tell Me More</a></li>
-                        </ul>
-                    </div>
+        <div id="page-wrapper">
+            <!-- Site title and introductory tagline. -->
+            <section id="header">
+                <div class="container">
+                    <h1 id="logo">
+                        <a href="index.html">
+                            <span>Computer Science</span>
+                            <span>Lesson Ideas</span>
+                        </a>
+                    </h1>
+                    <p>Aiding Educators Develop Computer Science Skills.</p>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        
+            <!-- Copyright and template attribution. -->
+            <section id="footer">
+                <div id="copyright" class="container">
+                    <ul class="links">
+                        <li>&copy; Untitled. All rights reserved.</li>
+                        <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+                    </ul>
+                </div>
+            </section>
+        </div>
 
-        
-
-        <!-- Footer -->
-        <section id="footer">
-            <div class="container">
-
-            </div>
-            <div id="copyright" class="container">
-                <ul class="links">
-                    <li>&copy; Untitled. All rights reserved.</li>
-                    <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-                </ul>
-            </div>
-        </section>
-
-    </div>
-
-    <!-- Scripts -->
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/js/jquery.dropotron.min.js"></script>
-    <script src="assets/js/browser.min.js"></script>
-    <script src="assets/js/breakpoints.min.js"></script>
-    <script src="assets/js/util.js"></script>
-    <script src="assets/js/main.js"></script>
-    <script src="assets/js/sidebar-toggle.js"></script>
-
-</body>
+        <!-- Load libraries and site scripts; sidebar-toggle.js controls the side menu. -->
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/jquery.dropotron.min.js"></script>
+        <script src="assets/js/browser.min.js"></script>
+        <script src="assets/js/breakpoints.min.js"></script>
+        <script src="assets/js/util.js"></script>
+        <script src="assets/js/main.js"></script>
+        <script src="assets/js/sidebar-toggle.js"></script>
+    </body>
 </html>
