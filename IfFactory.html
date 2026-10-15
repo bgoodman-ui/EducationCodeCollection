@@ -28,6 +28,9 @@
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
+const MAX_ITEMS = 60;
+const ON_MAIN_BELT = 0, ON_IFMACHINE_WAIT = 1, ON_VBELT1 = 2, ON_VBELT2 = 3;
+
 const rect = (x, y, w, h) => ({ x, y, w, h });
 const horizontalbelt = (x, y) => rect(x, y, 450, 70);
 const verticalbelt = (x, y) => rect(x, y, 70, 300);
@@ -42,15 +45,15 @@ let stripeOffset = 0;
 
 const machine = rect(150, 240, 100, 150);
 
-const IfMachine = rect(150, 200, 175, 175);
+//const IfMachine = rect(150, 200, 175, 175);
 const spawnPoint = { x: machine.x + machine.w, y: belt.y + belt.h / 2 - 15 };
 
-const splitter = rect(belt.x + belt.w, 240, 250, 150);
+const IfMachine = rect(belt.x + belt.w, 240, 250, 150);
 let itemsDestroyed = 0;
 let itemsShipped = 0;
 
-const vbelt1 = verticalbelt(splitter.x, splitter.y + splitter.h);
-const vbelt2 = verticalbelt(splitter.x + splitter.w - 70, splitter.y + splitter.h);
+const vbelt1 = verticalbelt(IfMachine.x, IfMachine.y + IfMachine.h);
+const vbelt2 = verticalbelt(IfMachine.x + IfMachine.w - 70, IfMachine.y + IfMachine.h);
 const shredder = rect(vbelt1.x, vbelt1.y + vbelt1.h, 170, 150);
 const shipper = rect(vbelt2.x, vbelt2.y + vbelt2.h, 170, 150);
 
@@ -107,7 +110,7 @@ function sendWaitingItems(destroyCount) {
   const destroy = [];
   let shipCount = 0;
   for (const it of items) {
-    if (it.active && it.onBelt === ON_SPLITTER_WAIT && !it.queued) {
+    if (it.active && it.onBelt === ON_IFMACHINE_WAIT && !it.queued) {
       it.queued = true;
       if (left > 0) {
         it.dest = ON_VBELT1;
@@ -154,12 +157,12 @@ function moveItem(it, dt) {
     case ON_MAIN_BELT:
       it.rect.x += beltspeed * dt;
       if (it.rect.x > belt.x + belt.w) {
-        it.onBelt = ON_SPLITTER_WAIT;
-        it.rect.x = splitter.x + (splitter.w - it.rect.w) / 2;
-        it.rect.y = splitter.y + (splitter.h - it.rect.h) / 2;
+        it.onBelt = ON_IFMACHINE_WAIT;
+        it.rect.x = IfMachine.x + (IfMachine.w - it.rect.w) / 2;
+        it.rect.y = IfMachine.y + (IfMachine.h - it.rect.h) / 2;
       }
       break;
-    case ON_SPLITTER_WAIT:
+    case ON_IFMACHINE_WAIT:
       break; // waits until the user enters a destroy count
     case ON_VBELT1:
       it.rect.y += beltspeed * dt;
@@ -169,7 +172,7 @@ function moveItem(it, dt) {
 }
 
 let beltRunning = false;
-let waitingAtSplitter = 0;
+let waitingAtIfMachine = 0;
 
 function update(dt) {
   if (spawnQueue > 0) {
@@ -212,7 +215,7 @@ function update(dt) {
   if (beltRunning) stripeOffset = (stripeOffset + beltspeed * dt) % (stripewidth * 2);
 
   for (const it of items) if (it.active) moveItem(it, dt);
-  waitingAtSplitter = items.filter(i => i.active && i.onBelt === ON_SPLITTER_WAIT).length;
+  waitingAtIfMachine = items.filter(i => i.active && i.onBelt === ON_IFMACHINE_WAIT).length;
 
   for (let i = shipBlocks.length - 1; i >= 0; i--) {
     const b = shipBlocks[i];
@@ -268,9 +271,9 @@ function draw() {
   fillRect(machine, DARKGRAY);
   text("MACHINE", machine.x + 5, machine.y + machine.h / 2 - 10, 14, RAYWHITE);
 
-  fillRect(splitter, DARKGRAY);
-  text("SPLITTER", splitter.x + 5, splitter.y + 10, 14, RAYWHITE);
-  text("Waiting: " + waitingAtSplitter, splitter.x + 5, splitter.y + splitter.h / 2, 16, RAYWHITE);
+  fillRect(IfMachine, DARKGRAY);
+  text("IF", IfMachine.x + 5, IfMachine.y + 10, 14, RAYWHITE);
+  text("Waiting: " + waitingAtIfMachine, IfMachine.x + 5, IfMachine.y + IfMachine.h / 2, 16, RAYWHITE);
 
   drawStripedBelt(belt, true);
   drawStripedBelt(vbelt1, false);
