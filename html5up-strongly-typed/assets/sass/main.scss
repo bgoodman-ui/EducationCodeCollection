@@ -684,11 +684,16 @@
 			font-weight: 700;
 			color: #ed786a;
 			text-shadow: 0.05em 0.075em 0 rgba(0, 0, 0, 0.1);
-			font-size: 3em;
-			letter-spacing: 13px;
+			font-size: clamp(1.4em, 5vw, 3em);
+			letter-spacing: clamp(2px, 0.8vw, 8px);
+			line-height: 1.2;
 
 			a {
 				border: 0;
+			}
+
+			span {
+				display: block;
 			}
 		}
 
@@ -1051,7 +1056,7 @@
 				}
 
 				h1 {
-					font-size: 2.5em;
+					font-size: clamp(1.4em, 5vw, 3em);
 				}
 			}
 
@@ -1353,9 +1358,9 @@
 				}
 
 				h1 {
-					font-size: 2em;
-					letter-spacing: 8px;
-					line-height: 1.325em;
+					font-size: clamp(1.4em, 5vw, 3em);
+					letter-spacing: clamp(2px, 0.8vw, 8px);
+					line-height: 1.2;
 				}
 
 				p {
