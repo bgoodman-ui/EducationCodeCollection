@@ -12,6 +12,7 @@
         <!-- Load the site's main styles and the off-canvas menu styles. -->
         <link rel="stylesheet" href="assets/css/main.css" />
         <link rel="stylesheet" href="assets/css/sidebar-toggle.css" />
+        <link rel="stylesheet" href="assets/css/factory-multiply.css" />
     </head>
     <body class="homepage is-preload">
         <!-- Button that opens and closes the side menu. -->
@@ -42,12 +43,54 @@
             <section id="header">
                 <div class="container">
                     <h1 id="logo">
-                        <a href="index.html">
+                        <a href="3rdGradeMath.html">
                             <span>3rd Grade Math</span>
                             <span>Lesson Ideas</span>
                         </a>
                     </h1>
                     <p>Explore math lesson ideas for third-grade students.</p>
+                </div>
+            </section>
+
+            <!-- Factory multiplication game: a FOR loop adds the same number repeatedly to build columns of boxes. -->
+            <section id="main">
+                <div class="container">
+                    <!-- #factory is the hook the CSS and JS use to find this activity. -->
+                    <div id="factory">
+                        <h2>Box Factory: Multiplication Loop</h2>
+                        <!-- Start runs the animation; Clear removes the boxes (wired up in factory-multiply.js). -->
+                        <div class="controls">
+                            <button id="factory-run" type="button">Start the Factory!</button>
+                            <button id="factory-reset" type="button" class="reset">Clear</button>
+                        </div>
+                        <!-- Status message ("Loop 2 of 3...") shown while the factory runs. -->
+                        <div class="msg" id="factory-msg" aria-live="polite"></div>
+                        <div class="scene-wrap">
+                            <!-- The factory room; the JS adds the boxes here. -->
+                            <div class="scene" id="factory-scene">
+                                <!-- Green machine holding the terminal. -->
+                                <div class="machine">
+                                    <div class="machine-label">BOX MAKER</div>
+                                    <!-- Terminal: the FOR loop. factory-times = how many loops (columns),
+                                         factory-add = how many boxes added each loop (column height). -->
+                                    <div class="code">
+                                        <span class="kw">let</span> boxes = <span class="num">0</span>;<br />
+                                        <span class="kw">for</span> (<span class="kw">let</span> i = 0; i &lt; <input id="factory-times" type="number" min="1" max="10" value="3" aria-label="Number of loops (columns)" />; i++) {<br />
+                                        <span class="indent">boxes = boxes + <input id="factory-add" type="number" min="1" max="10" value="4" aria-label="Number to add each loop (column height)" />;</span><br />
+                                        }
+                                    </div>
+                                </div>
+                                <!-- Pipe the boxes slide through, then drop down onto the belt. -->
+                                <div class="pipe"></div>
+                                <!-- Conveyor belt that carries each finished column to the end. -->
+                                <div class="belt"></div>
+                                <!-- Floor where the columns land. -->
+                                <div class="floor"></div>
+                            </div>
+                        </div>
+                        <!-- Running total shown as an addition, e.g. "total = 4 + 4 + 4 = 12". -->
+                        <div class="counter" id="factory-counter"></div>
+                    </div>
                 </div>
             </section>
 
@@ -70,5 +113,6 @@
         <script src="assets/js/util.js"></script>
         <script src="assets/js/main.js"></script>
         <script src="assets/js/sidebar-toggle.js"></script>
+        <script src="assets/js/factory-multiply.js"></script>
     </body>
 </html>
