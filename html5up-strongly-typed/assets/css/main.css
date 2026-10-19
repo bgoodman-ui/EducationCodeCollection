@@ -2114,6 +2114,31 @@ input, select, textarea {
 				color: #ed786a;
 			}
 
+/* Menu */
+	#menu > ul > ul >ul {
+		display: none;
+		margin: 0.5em 0 1.5em 0;
+		padding-left: 1em;
+		}
+		#menu ul a.opener.active + ul,
+		#menu ul span.opener.active + ul {
+			display: block;
+		}
+		#menu ul a.opener:before,
+#menu ul span.opener:before {
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    content: '\f078';
+    position: absolute;
+    right: 0;
+    transition: transform 0.2s ease-in-out;
+}
+
+#menu ul a.opener.active:before,
+#menu ul span.opener.active:before {
+    transform: rotate(-180deg);
+}
+
 /* Features */
 
 	#features {
