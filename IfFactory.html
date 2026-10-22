@@ -59,6 +59,7 @@ const shipper = rect(vbelt2.x, vbelt2.y + vbelt2.h, 170, 150);
 
 const items = Array.from({ length: MAX_ITEMS }, () => ({ rect: rect(0, 0, 30, 30), active: false, onBelt: ON_MAIN_BELT }));
 let spawnQueue = 0;
+let NextItemId = 1;
 let spawnTimer = 0;
 const spawnInterval = 0.5;
 
@@ -185,6 +186,7 @@ function update(dt) {
         slot.rect = rect(spawnPoint.x, spawnPoint.y, 30, 30);
         slot.onBelt = ON_MAIN_BELT;
         slot.queued = false;
+        slot.id = NextItemId++; //first block will be one, second will be two, etc..
         spawnQueue--;
       }
     }
@@ -272,8 +274,15 @@ function draw() {
   text("MACHINE", machine.x + 5, machine.y + machine.h / 2 - 10, 14, RAYWHITE);
 
   fillRect(IfMachine, DARKGRAY);
-  text("IF", IfMachine.x + 5, IfMachine.y + 10, 14, RAYWHITE);
-  text("Waiting: " + waitingAtIfMachine, IfMachine.x + 5, IfMachine.y + IfMachine.h / 2, 16, RAYWHITE);
+  text("IF", IfMachine.x + IfMachine.w / 2 - measure("IF",14)/2, IfMachine.y + 10, 27, RAYWHITE);
+  const waitingLabel = "Waiting: " + waitingAtIfMachine;
+text(
+  waitingLabel,
+  IfMachine.x + IfMachine.w / 2 - measure(waitingLabel, 16) / 2, // center horizontally
+  IfMachine.y + IfMachine.h / 2 - 8,                             // center vertically (8 = half of the 16px font)
+  16,
+  RAYWHITE
+);
 
   drawStripedBelt(belt, true);
   drawStripedBelt(vbelt1, false);
@@ -289,7 +298,13 @@ function draw() {
   text("Shippable", shipper.x + 5, shipper.y + 28, 14, RAYWHITE);
   text(String(itemsShipped), shipper.x + 5 + measure("Shippable", 14) + 8, shipper.y + 28, 18, RAYWHITE);
 
-  for (const it of items) if (it.active) fillRect(it.rect, ORANGE);
+  for (const it of items) 
+  {
+    if (!it.active) continue;
+     fillRect(it.rect, ORANGE);
+     const label = String(it.id);
+     text(label, it.rect.x + it.rect.w / 2 - measure(label, 14) / 2, it.rect.y + it.rect.h / 2 - 7, 14 ,"#000");
+  }
 
   for (const b of shipBlocks) {
     fillRect(b.rect, ORANGE);
