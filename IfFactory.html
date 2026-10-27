@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>If Loop - factory visual</title>
+<title>If Loop - even/odd factory</title>
 <style>
   :root {
     --bg: #f5f5f5;
@@ -23,51 +23,50 @@
 </style>
 </head>
 <body>
-<div id="wrap"><canvas id="c" width="1200" height="800"></canvas></div>
+<div id="wrap"><canvas id="c" width="1200" height="760"></canvas></div>
 <script>
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
 const MAX_ITEMS = 60;
-const ON_MAIN_BELT = 0, ON_IFMACHINE_WAIT = 1, ON_VBELT1 = 2, ON_VBELT2 = 3;
+const ON_MAIN_BELT = 0, ON_VBELT1 = 2, ON_VBELT2 = 3;
 
 const rect = (x, y, w, h) => ({ x, y, w, h });
 const horizontalbelt = (x, y) => rect(x, y, 450, 70);
-const verticalbelt = (x, y) => rect(x, y, 70, 300);
+const verticalbelt = (x, y) => rect(x, y, 70, 150);
 
-//setup how big machines are and where they are
+// ---- layout ----
 const belt = horizontalbelt(250, 280);
 const beltspeed = 120;
 const stripewidth = 20;
 let stripeOffset = 0;
 
-
-
 const machine = rect(150, 240, 100, 150);
-
-//const IfMachine = rect(150, 200, 175, 175);
 const spawnPoint = { x: machine.x + machine.w, y: belt.y + belt.h / 2 - 15 };
 
 const IfMachine = rect(belt.x + belt.w, 240, 250, 150);
-let itemsDestroyed = 0;
-let itemsShipped = 0;
 
+// left belt = odds -> oddMachine, right belt = evens -> evenMachine
 const vbelt1 = verticalbelt(IfMachine.x, IfMachine.y + IfMachine.h);
 const vbelt2 = verticalbelt(IfMachine.x + IfMachine.w - 70, IfMachine.y + IfMachine.h);
-const shredder = rect(vbelt1.x, vbelt1.y + vbelt1.h, 170, 150);
-const shipper = rect(vbelt2.x, vbelt2.y + vbelt2.h, 170, 150);
+const oddMachine = rect(vbelt1.x, vbelt1.y + vbelt1.h, 170, 150);
+const evenMachine = rect(vbelt2.x, vbelt2.y + vbelt2.h, 170, 150);
+
+// numbers that have arrived at each machine
+const evens = [];
+const odds = [];
 
 const items = Array.from({ length: MAX_ITEMS }, () => ({ rect: rect(0, 0, 30, 30), active: false, onBelt: ON_MAIN_BELT }));
 let spawnQueue = 0;
+let NextItemId = 1;
 let spawnTimer = 0;
 const spawnInterval = 0.5;
 
+// ---- table layout ----
+const TABLE = { x: 150, y: 410, w: 450, headH: 32, rowH: 28, maxRows: 8 };
 
-
-
-// ---- input boxes ----
+// ---- input box ----
 const box1 = { r: rect(150, 50, 200, 40), text: "", typing: false, label: "How many packages coming in?" };
-const box2 = { r: rect(150, 120, 200, 40), text: "", typing: false, label: "How many need to be destroyed?" };
 
 const mouse = { x: 0, y: 0 };
 const hit = (p, r) => p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
@@ -79,75 +78,35 @@ function toCanvas(e) {
 
 canvas.addEventListener("mousemove", e => {
   Object.assign(mouse, toCanvas(e));
-  canvas.style.cursor = (hit(mouse, box1.r) || hit(mouse, box2.r)) ? "text" : "default";
+  canvas.style.cursor = hit(mouse, box1.r) ? "text" : "default";
 });
 
 canvas.addEventListener("mousedown", e => {
   Object.assign(mouse, toCanvas(e));
   box1.typing = hit(mouse, box1.r);
-  box2.typing = hit(mouse, box2.r);
 });
 
-// Assign waiting items a destination.
-// Destroy items release one by one over time, each as its own square.
-// Ship items are collapsed into a single block carrying the whole count,
-// which travels down the ship belt as one square.
-const releaseQueue = [];
-const shipBlocks = []; // { rect, count } -- already placed on the belt, moving
-const pendingShip = []; // counts waiting for the shredder queue to finish first
-let releaseTimer = 0;
-let shipCooldown = 0;
-
-function placeOnBelt(it) {
-  const vb = it.dest === ON_VBELT1 ? vbelt1 : vbelt2;
-  it.onBelt = it.dest;
-  it.rect.x = vb.x + (vb.w - it.rect.w) / 2;
-  it.rect.y = vb.y;
-}
-
-function sendWaitingItems(destroyCount) {
-  let left = destroyCount;
-  const destroy = [];
-  let shipCount = 0;
-  for (const it of items) {
-    if (it.active && it.onBelt === ON_IFMACHINE_WAIT && !it.queued) {
-      it.queued = true;
-      if (left > 0) {
-        it.dest = ON_VBELT1;
-        destroy.push(it);
-        left--;
-      } else {
-        it.active = false; // no longer drawn as its own square
-        shipCount++;
-      }
-    }
-  }
-  releaseQueue.push(...destroy);
-  if (shipCount > 0) pendingShip.push(shipCount);
-}
-
-function releaseNext() {
-  placeOnBelt(releaseQueue.shift());
-}
-
 window.addEventListener("keydown", e => {
-  const box = box1.typing ? box1 : box2.typing ? box2 : null;
-  if (!box) return;
-
-  if (e.key >= "0" && e.key <= "9" && e.key.length === 1 && box.text.length < 7) {
-    box.text += e.key;
+  if (!box1.typing) return;
+  if (e.key >= "0" && e.key <= "9" && e.key.length === 1 && box1.text.length < 7) {
+    box1.text += e.key;
   } else if (e.key === "Backspace") {
-    box.text = box.text.slice(0, -1);
+    box1.text = box1.text.slice(0, -1);
     e.preventDefault();
-  } else if (e.key === "Enter" && box.text.length > 0) {
-    const n = parseInt(box.text, 10);
-    if (box === box1) {
-      if (n > 0) spawnQueue += n;
-    } else {
-      sendWaitingItems(n);
+  } else if (e.key === "Enter" && box1.text.length > 0) {
+    const n = parseInt(box1.text, 10);
+    if (n > 0) {
+      // starting a new run: if the last one has fully finished, reset everything
+      if (spawnQueue === 0 && !items.some(i => i.active)) {
+        evens.length = 0;
+        odds.length = 0;
+        NextItemId = 1;
+        spawnTimer = 0;
+      }
+      spawnQueue += n;
     }
-    box.text = "";
-    box.typing = false;
+    box1.text = "";
+    box1.typing = false;
   }
 });
 
@@ -157,22 +116,25 @@ function moveItem(it, dt) {
     case ON_MAIN_BELT:
       it.rect.x += beltspeed * dt;
       if (it.rect.x > belt.x + belt.w) {
-        it.onBelt = ON_IFMACHINE_WAIT;
-        it.rect.x = IfMachine.x + (IfMachine.w - it.rect.w) / 2;
-        it.rect.y = IfMachine.y + (IfMachine.h - it.rect.h) / 2;
+        // the IF machine: even -> right belt, odd -> left belt
+        const vb = (it.id % 2 === 0) ? vbelt2 : vbelt1;
+        it.onBelt = (it.id % 2 === 0) ? ON_VBELT2 : ON_VBELT1;
+        it.rect.x = vb.x + (vb.w - it.rect.w) / 2;
+        it.rect.y = vb.y;
       }
       break;
-    case ON_IFMACHINE_WAIT:
-      break; // waits until the user enters a destroy count
     case ON_VBELT1:
       it.rect.y += beltspeed * dt;
-      if (it.rect.y > vbelt1.y + vbelt1.h) { it.active = false; itemsDestroyed++; }
+      if (it.rect.y > vbelt1.y + vbelt1.h) { it.active = false; odds.push(it.id); }
+      break;
+    case ON_VBELT2:
+      it.rect.y += beltspeed * dt;
+      if (it.rect.y > vbelt2.y + vbelt2.h) { it.active = false; evens.push(it.id); }
       break;
   }
 }
 
 let beltRunning = false;
-let waitingAtIfMachine = 0;
 
 function update(dt) {
   if (spawnQueue > 0) {
@@ -184,47 +146,16 @@ function update(dt) {
         slot.active = true;
         slot.rect = rect(spawnPoint.x, spawnPoint.y, 30, 30);
         slot.onBelt = ON_MAIN_BELT;
-        slot.queued = false;
+        slot.id = NextItemId++;
         spawnQueue--;
       }
     }
   }
 
-  const destroyItemsInFlight = items.some(i => i.active && i.onBelt === ON_VBELT1);
-
-  if (releaseQueue.length > 0) {
-    releaseTimer += dt;
-    if (releaseTimer >= spawnInterval) { releaseTimer = 0; releaseNext(); }
-    shipCooldown = 0;
-  } else if (destroyItemsInFlight) {
-    // last destroy squares are still traveling down to the shredder
-    shipCooldown = 0;
-  } else if (pendingShip.length > 0) {
-    // shredder is fully done and emptied -- hold the same cooldown gap, then ship
-    shipCooldown += dt;
-    if (shipCooldown >= spawnInterval) {
-      shipCooldown = 0;
-      const count = pendingShip.shift();
-      shipBlocks.push({ rect: rect(vbelt2.x + (vbelt2.w - 30) / 2, vbelt2.y, 30, 30), count });
-    }
-  } else {
-    releaseTimer = spawnInterval; // next item drops immediately
-  }
-
-  beltRunning = items.some(i => i.active) || spawnQueue > 0 || shipBlocks.length > 0 || releaseQueue.length > 0 || pendingShip.length > 0;
+  beltRunning = items.some(i => i.active) || spawnQueue > 0;
   if (beltRunning) stripeOffset = (stripeOffset + beltspeed * dt) % (stripewidth * 2);
 
   for (const it of items) if (it.active) moveItem(it, dt);
-  waitingAtIfMachine = items.filter(i => i.active && i.onBelt === ON_IFMACHINE_WAIT).length;
-
-  for (let i = shipBlocks.length - 1; i >= 0; i--) {
-    const b = shipBlocks[i];
-    b.rect.y += beltspeed * dt;
-    if (b.rect.y > vbelt2.y + vbelt2.h) {
-      itemsShipped += b.count;
-      shipBlocks.splice(i, 1);
-    }
-  }
 }
 
 // ---- drawing ----
@@ -241,6 +172,7 @@ function text(str, x, y, size, color) {
   ctx.fillText(str, x, y);
 }
 function measure(str, size) { ctx.font = size + "px sans-serif"; return ctx.measureText(str).width; }
+function centerText(str, cx, y, size, color) { text(str, cx - measure(str, size) / 2, y, size, color); }
 
 function drawStripedBelt(r, horizontal) {
   fillRect(r, DARKGRAY);
@@ -265,6 +197,40 @@ function drawInput(b) {
   text(b.label, b.r.x, b.r.y - 20, 14, DARKGRAY);
 }
 
+function drawTable() {
+  const colW = TABLE.w / 2;
+  const bodyH = TABLE.rowH * TABLE.maxRows;
+
+  // header (Odd on the left, Even on the right)
+  fillRect(rect(TABLE.x, TABLE.y, colW, TABLE.headH), DARKGRAY);
+  fillRect(rect(TABLE.x + colW, TABLE.y, colW, TABLE.headH), DARKGRAY);
+  centerText("Even (" + evens.length + ")", TABLE.x + colW * 1.5, TABLE.y + 8, 16, RAYWHITE);
+  centerText("Odd (" + odds.length + ")", TABLE.x + colW / 2, TABLE.y + 8, 16, RAYWHITE);
+
+  // body rows (show the latest maxRows entries in each column)
+  const evenShown = evens.slice(-TABLE.maxRows);
+  const oddShown = odds.slice(-TABLE.maxRows);
+  for (let i = 0; i < TABLE.maxRows; i++) {
+    const y = TABLE.y + TABLE.headH + i * TABLE.rowH;
+    const bg = i % 2 === 0 ? "#ffffff" : "#ececec";
+    fillRect(rect(TABLE.x, y, TABLE.w, TABLE.rowH), bg);
+    if (i < evenShown.length) centerText(String(evenShown[i]), TABLE.x + colW * 1.5, y + 6, 16, "#000");
+    if (i < oddShown.length) centerText(String(oddShown[i]), TABLE.x + colW / 2, y + 6, 16, "#000");
+  }
+
+  // grid lines
+  ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
+  ctx.strokeRect(TABLE.x + 1, TABLE.y + 1, TABLE.w - 2, TABLE.headH + bodyH - 2);
+  ctx.beginPath();
+  ctx.moveTo(TABLE.x + colW, TABLE.y); ctx.lineTo(TABLE.x + colW, TABLE.y + TABLE.headH + bodyH);
+  ctx.moveTo(TABLE.x, TABLE.y + TABLE.headH); ctx.lineTo(TABLE.x + TABLE.w, TABLE.y + TABLE.headH);
+  ctx.stroke();
+
+  // overflow note
+  const hidden = Math.max(evens.length, odds.length) - TABLE.maxRows;
+  if (hidden > 0) text("Showing latest " + TABLE.maxRows + " per column", TABLE.x, TABLE.y + TABLE.headH + bodyH + 8, 14, DARKGRAY);
+}
+
 function draw() {
   fillRect(rect(0, 0, canvas.width, canvas.height), RAYWHITE);
 
@@ -272,42 +238,46 @@ function draw() {
   text("MACHINE", machine.x + 5, machine.y + machine.h / 2 - 10, 14, RAYWHITE);
 
   fillRect(IfMachine, DARKGRAY);
-  text("IF", IfMachine.x + 5, IfMachine.y + 10, 14, RAYWHITE);
-  text("Waiting: " + waitingAtIfMachine, IfMachine.x + 5, IfMachine.y + IfMachine.h / 2, 16, RAYWHITE);
+  centerText("IF", IfMachine.x + IfMachine.w / 2, IfMachine.y + 10, 27, RAYWHITE);
+  centerText("number is even?", IfMachine.x + IfMachine.w / 2, IfMachine.y + 55, 16, RAYWHITE);
+  text("NO: left", IfMachine.x + 10, IfMachine.y + IfMachine.h - 28, 14, RAYWHITE);
+  const noLabel = "YES: right";
+  text(noLabel, IfMachine.x + IfMachine.w - 10 - measure(noLabel, 14), IfMachine.y + IfMachine.h - 28, 14, RAYWHITE);
 
   drawStripedBelt(belt, true);
   drawStripedBelt(vbelt1, false);
   drawStripedBelt(vbelt2, false);
 
-  fillRect(shredder, DARKGRAY);
-  text("Shredder", shredder.x + 5, shredder.y + 10, 14, RAYWHITE);
-  text("DESTROY", shredder.x + 5, shredder.y + 28, 14, RAYWHITE);
-  text(String(itemsDestroyed), shredder.x + 5 + measure("DESTROY", 14) + 8, shredder.y + 28, 18, RAYWHITE);
+  // left box: Odd
+  fillRect(oddMachine, DARKGRAY);
+  text("Odd", oddMachine.x + 5, oddMachine.y + 10, 20, RAYWHITE);
+  text("Count", oddMachine.x + 5, oddMachine.y + 38, 14, RAYWHITE);
+  text(String(odds.length), oddMachine.x + 5 + measure("Count", 14) + 8, oddMachine.y + 36, 18, RAYWHITE);
 
-  fillRect(shipper, DARKGRAY);
-  text("Shipper", shipper.x + 5, shipper.y + 10, 14, RAYWHITE);
-  text("Shippable", shipper.x + 5, shipper.y + 28, 14, RAYWHITE);
-  text(String(itemsShipped), shipper.x + 5 + measure("Shippable", 14) + 8, shipper.y + 28, 18, RAYWHITE);
+  // right box: Even
+  fillRect(evenMachine, DARKGRAY);
+  text("Even", evenMachine.x + 5, evenMachine.y + 10, 20, RAYWHITE);
+  text("Count", evenMachine.x + 5, evenMachine.y + 38, 14, RAYWHITE);
+  text(String(evens.length), evenMachine.x + 5 + measure("Count", 14) + 8, evenMachine.y + 36, 18, RAYWHITE);
 
-  for (const it of items) if (it.active) fillRect(it.rect, ORANGE);
-
-  for (const b of shipBlocks) {
-    fillRect(b.rect, ORANGE);
-    strokeRect(b.rect, 2, "#000");
-    const label = String(b.count);
-    text(label, b.rect.x + b.rect.w / 2 - measure(label, 14) / 2, b.rect.y + b.rect.h / 2 - 7, 14, "#000");
+  for (const it of items) {
+    if (!it.active) continue;
+    fillRect(it.rect, ORANGE);
+    const label = String(it.id);
+    text(label, it.rect.x + it.rect.w / 2 - measure(label, 14) / 2, it.rect.y + it.rect.h / 2 - 7, 14, "#000");
   }
 
-  drawInput(box1);
-  drawInput(box2);
+  drawTable();
 
-  if (spawnQueue > 0) text("Shipping " + spawnQueue + " more...", 150, 200, 20, MAROON);
+  drawInput(box1);
+
+  if (spawnQueue > 0) text("Sending " + spawnQueue + " more...", 150, 200, 20, MAROON);
 }
 
-// ---- main loop (the equivalent of while(!WindowShouldClose())) ----
+// ---- main loop ----
 let last = performance.now();
 function frame(now) {
-  const dt = Math.min((now - last) / 1000, 0.1); // clamp so a background tab doesn't cause a huge jump
+  const dt = Math.min((now - last) / 1000, 0.1);
   last = now;
   update(dt);
   draw();
