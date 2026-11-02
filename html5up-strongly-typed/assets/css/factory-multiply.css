@@ -1,7 +1,7 @@
 /* Box Factory styles. Everything is scoped under #factory so it can't affect the rest of the site. */
 
 /* Dark outer panel around the whole activity */
-#factory { max-width: 1000px; margin: 0 auto; padding: 1.5em; background: #2f3640; color: #f5f6fa; border-radius: 12px; font-family: system-ui, sans-serif; }
+#factory { width: fit-content; max-width: 100%; box-sizing: border-box; margin: 0; padding: 1.5em; background: #2f3640; color: #f5f6fa; border-radius: 12px; font-family: system-ui, sans-serif; }
 #factory h2 { color: #fbc531; margin: 0 0 .5em; }
 
 /* ---- Terminal (the FOR loop code inside the green machine) ---- */
@@ -24,8 +24,7 @@
 
 /* ---- Factory scene: positions below are in pixels from the scene's top-left ---- */
 /* The grey room everything is drawn in */
-#factory .scene { position: relative; width: 900px; height: 520px; background: #dcdde1; border-radius: 10px; overflow: hidden; }
-
+#factory .scene { position: relative; width: 900px; height: 520px; background: #dcdde1; border-radius: 10px; overflow: hidden; transform: scale(.75); transform-origin: top left; }
 /* Conveyor belt: moving stripes come from sliding the background; paused until "running" */
 #factory .belt { position: absolute; left: 0; top: 480px; width: 520px; height: 20px; background: repeating-linear-gradient(90deg, #353b48 0 20px, #57606f 20px 40px); background-size: 40px 100%; animation: factory-belt 1s linear infinite; animation-play-state: paused; border-radius: 6px; }
 #factory.running .belt { animation-play-state: running; } /* the JS adds .running while playing */
@@ -57,4 +56,4 @@
 /* The "total = 4 + 4 + 4 = 12" line under the scene */
 #factory .counter { margin-top: .8em; font: 1.2em "Courier New", monospace; word-break: break-word; }
 /* Lets the wide scene scroll sideways on small screens */
-#factory .scene-wrap { overflow-x: auto; }
+#factory .scene-wrap { overflow: hidden; width: 675px; height: 390px; max-width: 100%; }
