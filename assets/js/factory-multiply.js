@@ -13,20 +13,59 @@
   var msg = document.getElementById('factory-msg');         // "Loop 2 of 3..." message
   var counter = document.getElementById('factory-counter'); // "total = 4 + 4 = 8" line
   var scene = document.getElementById('factory-scene');     // area where boxes are drawn
+  var colorMachine = document.getElementById('factory-color-machine');
 
   // ---- Layout numbers (pixels inside the scene; keep in sync with the CSS) ----
   var PITCH = 32;          // box size + gap, used to stack boxes
-  var BELT_TOP = 480;      // top of the belt; boxes sit on it
+  var BELT_TOP = 480;      // top of the belt; flush with the bottom of the main machine
   var FLOOR_TOP = 500;     // top of the floor; dropped stacks sit on it
   var CHUTE_X = 320;       // hidden behind the machine; boxes start here
-  var PIPE_TOP = 58;       // height of the pipe's horizontal run
-  var STACK_X = 352;       // where each column builds up, under the pipe spout
-  var END_X = 488;         // end of the belt, where columns fall off
-  var BIN_X = 570;         // left edge of the first dropped column
-  var running = false;     // true while an animation is playing
+  var PIPE_TOP = 88;       // height of the pipe's horizontal run
+  var STACK_X = 352;       // where each column builds up, under the pipe spout, on the belt
+  var COLOR_X = 475;       // where the column sits once the belt carries it into the color machine (belt end)
 
+
+  var PALETTE = ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#1abc9c',
+               '#3498db', '#9b59b6', '#e84393', '#795548', '#607d8b'];
+
+  var END_X = 520;         // point the column slides to as it exits the color machine
+  var BIN_X = 560;         // left edge of the first dropped column
+  var running = false;     // true while an animation is playing
+  var STOPPED = {};
+
+
+  var runId = 0;
+  var stopped = {};
   // Pause helper: "await wait(500)" waits half a second.
-  var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  var wait = function (ms) { 
+    var id = runId;
+    return new Promise(function (resolve,reject)
+     {
+    setTimeout(function () {
+      if (id !== runId) reject(STOPPED); else resolve();
+    }, ms);
+  });
+  };
+
+  // Cancel any run, unlock the controls, and wipe the scene.
+function stop() {
+  runId++;
+  running = false;
+  root.classList.remove('running');
+  runBtn.disabled = timesIn.disabled = addIn.disabled = false;
+  colorMachine.classList.remove('working');
+  colorMachine.style.removeProperty('--machine-color');
+  clearScene();
+}
+
+  //fisher yates shuffle so each column is a different color
+  function shuffle(arr) {
+  for (var k = arr.length - 1; k > 0; k--) {
+    var r = Math.floor(Math.random() * (k + 1));
+    var t = arr[k]; arr[k] = arr[r]; arr[r] = t;
+  }
+  return arr;
+}
 
   // Turn an input into a whole number from 1 to 10, or null if it's blank/invalid.
   function clamp(input) {
@@ -40,6 +79,8 @@
     scene.querySelectorAll('.box').forEach(function (b) { b.remove(); });
     counter.textContent = '';
     msg.textContent = '';
+    colorMachine.classList.remove('working');
+    colorMachine.style.removeProperty('--machine-color');
   }
 
   // The animation. Each pass of the outer loop is one pass of the on-screen FOR loop.
@@ -61,6 +102,9 @@
 
     var total = 0;   // running answer
     var parts = [];  // the numbers added so far, for the "4 + 4 + 4" text
+
+    var colors = shuffle(PALETTE.slice());  // copy, so the original palette stays intact
+    try{
     for (var i = 0; i < times; i++) {
       total += add;
       parts.push(add);
@@ -85,9 +129,29 @@
       }
       await wait(200);
 
-      // Column is full: the belt carries it to the end...
-      column.forEach(function (b) { b.style.left = END_X + 'px'; });
+      // Peek the color this column will become, and tint the machine with it
+      // first, so it looks like the paint already loaded inside is waiting for the boxes.
+      var color = colors.pop();   // removed from the pool, so it can never repeat
+      colorMachine.style.setProperty('--machine-color', color);
+
+      // Column is full: the belt carries it down the line into the color machine...
+      column.forEach(function (b) { b.style.left = COLOR_X + 'px'; });
       await wait(900);
+
+      // ...which paints the whole column that same color.
+      msg.textContent = 'Color machine: painting column ' + (i + 1) + '!';
+      colorMachine.classList.add('working');
+      column.forEach(function (b) { 
+        b.style.setProperty('--paint',color);
+        b.classList.add('painted');
+       });
+      await wait(900);
+      colorMachine.classList.remove('working');
+      colorMachine.style.removeProperty('--machine-color');
+
+      // Then the belt carries the painted column out the other side of the machine...
+      column.forEach(function (b) { b.style.left = END_X + 'px'; });
+      await wait(600);
 
       // ...then it drops off into the next slot, side by side with earlier columns.
       var destX = BIN_X + i * PITCH;
@@ -96,6 +160,10 @@
         b.style.top = (FLOOR_TOP - (j + 1) * PITCH + 2) + 'px';
       });
       await wait(450);
+    }
+    } catch(e) {
+      if (e === STOPPED) return;
+      throw e;
     }
 
     // Final answer, then unlock the controls.
@@ -107,5 +175,5 @@
 
   // Start and Clear buttons (Clear is ignored while running).
   runBtn.addEventListener('click', run);
-  resetBtn.addEventListener('click', function () { if (!running) clearScene(); });
+  resetBtn.addEventListener('click', stop);
 })();
