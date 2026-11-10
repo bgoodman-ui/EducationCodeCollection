@@ -1,0 +1,147 @@
+.factory-example {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.factory-fullscreen-toggle {
+  position: absolute;
+  top: 0.75em;
+  right: 0.75em;
+  z-index: 4;
+  display: inline-flex;
+  width: 2.75em;
+  height: 2.75em;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(80, 80, 80, 0.45);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: #222;
+  cursor: pointer;
+  font: 1.5em/1 system-ui, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.factory-fullscreen-toggle:hover,
+.factory-fullscreen-toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.factory-fullscreen-toggle:focus-visible {
+  outline: 2px solid #0079f1;
+  outline-offset: 2px;
+}
+
+#factory .factory-fullscreen-toggle {
+  padding: 0;
+  border: 1px solid rgba(80, 80, 80, 0.45);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: #222;
+  font-size: 1.5em;
+}
+
+#factory .factory-fullscreen-toggle:hover,
+#factory .factory-fullscreen-toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.factory-fullscreen-icon {
+  display: block;
+  line-height: 1;
+  color: var(--fullscreen-icon-color, #fff);   /* default is white */
+}
+
+.factory-fullscreen-status {
+  position: absolute;   /* out of the layout flow */
+  left: 0.75em;
+  bottom: 0.5em;
+  z-index: 4;
+  margin: 0;
+  color: #9b1c1c;
+  font-size: 0.9em;
+}
+
+.factory-example:fullscreen {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  overflow: auto;
+  margin: 0;
+  padding: 1em;
+  background: #fff;
+  color: #222;
+}
+
+.factory-example:fullscreen .factory-fullscreen-status {
+  position: static;
+  min-height: 1.25em;
+}
+
+.factory-example:fullscreen > h2,
+.factory-example:fullscreen > p {
+  max-width: 675px;
+}
+
+.factory-example:fullscreen #factory {
+  margin: 0;
+}
+
+.factory-example:fullscreen .factory-fullscreen-toggle {
+  position: fixed;
+  top: max(0.75em, env(safe-area-inset-top, 0px));
+  right: max(0.75em, env(safe-area-inset-right, 0px));
+}
+
+.factory-example:fullscreen .factory-fullscreen-icon {
+  font-size: 1.5em;   /* increase to make the X bigger */
+  color: var(--fullscreen-x-color, #000);   /* X defaults to black */
+}
+
+/* Box Factory: scaled from its center; hide overflow so no scrollbars appear */
+.factory-example:fullscreen:has(#factory) {
+  overflow: hidden;
+}
+
+.factory-example:fullscreen #factory {
+  transform-origin: center center;
+}
+
+.factory-example:fullscreen #fin-for-factory-wrap,
+.factory-example:fullscreen #if-factory-wrap {
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  display: flex;
+  justify-content: center;
+}
+
+/* For loop canvas is 1200x800 (3:2) */
+.factory-example:fullscreen #fin-for-factory-canvas {
+  width: min(calc(100vw - 2em), calc((100vh - 4em) * 1200 / 800));
+  height: auto;
+  max-width: none;
+  max-height: none;
+}
+
+/* If canvas is 1200x760 */
+.factory-example:fullscreen #if-factory-canvas {
+  width: min(calc(100vw - 2em), calc((100vh - 4em) * 1200 / 760));
+  height: auto;
+  max-width: none;
+  max-height: none;
+}
+
+@media (max-width: 736px) {
+  .factory-fullscreen-toggle {
+    top: 0.4em;
+    right: 0.4em;
+  }
+}

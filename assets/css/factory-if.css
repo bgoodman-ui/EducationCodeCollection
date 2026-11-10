@@ -1,0 +1,33 @@
+.if-factory-page {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  margin: 0;
+  background: #f5f5f5;
+  color: #222;
+  font-family: system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  .if-factory-page:not([data-theme="light"]) {
+    background: #1b1b1b;
+    color: #eee;
+  }
+}
+
+.if-factory-page[data-theme="dark"] {
+  background: #1b1b1b;
+  color: #eee;
+}
+
+#if-factory-wrap {
+  max-width: 675px;
+  margin: 0 auto;
+}
+
+#if-factory-wrap canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #f5f5f5;
+}
