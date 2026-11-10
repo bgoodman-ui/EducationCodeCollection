@@ -12,6 +12,9 @@
         <!-- Load the site's main styles and the off-canvas menu styles. -->
         <link rel="stylesheet" href="assets/css/main.css" />
         <link rel="stylesheet" href="assets/css/sidebar-toggle.css" />
+        <link rel="stylesheet" href="assets/css/factory-fullscreen.css" />
+        <link rel="stylesheet" href="assets/css/factory-finfor.css" />
+        <link rel="stylesheet" href="assets/css/factory-if.css" />
         <link rel="stylesheet" href="assets/css/factory-multiply.css" />
     </head>
     <body class="homepage is-preload">
@@ -52,59 +55,83 @@
                 </div>
             </section>
 
-            <!-- Factory multiplication game: a FOR loop adds the same number repeatedly to build columns of boxes. -->
+            <!-- Interactive factory examples appear in lesson order: FOR, IF, then multiplication. -->
             <section id="main">
                 <div class="container">
-                    <!-- #factory is the hook the CSS and JS use to find this activity. -->
-                    <div id="factory">
-                        <h2>Box Factory: Multiplication Loop</h2>
-                        <!-- Start runs the animation; Clear removes the boxes (wired up in factory-multiply.js). -->
-                        <div class="controls">
-                            <button id="factory-run" type="button">Start the Factory!</button>
-                            <button id="factory-reset" type="button" class="reset">Clear</button>
+                    <h2>For Loop Factory: Shred and Ship</h2>
+                    <p>Click an input box, type a number, and press Enter. Send packages to the splitter, then choose how many to destroy; the rest are shipped.</p>
+                    <section class="factory-example" style="--fullscreen-icon-color: #000">
+                        <button class="factory-fullscreen-toggle" type="button" aria-label="Enter fullscreen" title="Enter fullscreen"><span class="factory-fullscreen-icon" aria-hidden="true">⛶</span></button>
+                        <p class="factory-fullscreen-status" aria-live="polite"></p>
+                        <div id="fin-for-factory-wrap">
+                            <canvas id="fin-for-factory-canvas" width="1200" height="800" aria-label="For-loop package factory. Click an input box, enter a number, and press Enter." tabindex="0"></canvas>
                         </div>
-                        <!-- Status message ("Loop 2 of 3...") shown while the factory runs. -->
-                        <div class="msg" id="factory-msg" aria-live="polite"></div>
-                        <div class="scene-wrap">
-                            <!-- The factory room; the JS adds the boxes here. -->
-                            <div class="scene" id="factory-scene">
-                                <!-- Green machine holding the terminal. -->
-                                <div class="machine">
-                                    <div class="machine-label">BOX MAKER</div>
-                                    <!-- Terminal: the FOR loop. factory-times = how many loops (columns),
-                                         factory-add = how many boxes added each loop (column height). -->
-                                    <div class="code">
-                                        <span class="kw">let</span> boxes = <span class="num">0</span>;<br />
-                                        <span class="kw">for</span> (<span class="kw">let</span> i = 0; i &lt; <input id="factory-times" type="number" min="1" max="10" value="3" aria-label="Number of loops (columns)" />; i++) {<br />
-                                        <span class="indent">boxes = boxes + <input id="factory-add" type="number" min="1" max="10" value="4" aria-label="Number to add each loop (column height)" />;</span><br />
-                                        }
-                                    </div>
-                                </div>
-                                <!-- Pipe the boxes slide through, then drop down onto the belt. -->
-                                <div class="pipe"></div>
-                                <!-- Color Machine changes the colors of the box columns. -->
-                                <div class="color-machine" id="factory-color-machine">
-                                    <div class="color-machine-label">COLOR</div>
-                                </div>
-                                <!-- Conveyor belt that carries each finished column to the end. -->
-                                <div class="belt"></div>
-                                <!-- Floor where the columns land. -->
-                                <div class="floor"></div>
+                    </section>
+
+                    <h2>If Factory: Sort Even and Odd</h2>
+                    <p>Click the input box, type how many numbered packages to send, and press Enter. The IF statement sorts even and odd numbers onto separate belts.</p>
+                    <section class="factory-example" style="--fullscreen-icon-color: #000">
+                        <button class="factory-fullscreen-toggle" type="button" aria-label="Enter fullscreen" title="Enter fullscreen"><span class="factory-fullscreen-icon" aria-hidden="true">⛶</span></button>
+                        <p class="factory-fullscreen-status" aria-live="polite"></p>
+                        <div id="if-factory-wrap">
+                            <canvas id="if-factory-canvas" width="1200" height="760" aria-label="If-statement factory that sorts numbered packages into odd and even groups. Click the input box, enter a number, and press Enter." tabindex="0"></canvas>
+                        </div>
+                    </section>
+
+                    <h2>Box Factory: Multiplication Loop</h2>
+                    <section class="factory-example">
+                        <button class="factory-fullscreen-toggle" type="button" aria-label="Enter fullscreen" title="Enter fullscreen"><span class="factory-fullscreen-icon" aria-hidden="true">⛶</span></button>
+                        <p class="factory-fullscreen-status" aria-live="polite"></p>
+                        <!-- #factory is the hook the CSS and JS use to find this activity. -->
+                        <div id="factory">
+                            <!-- Start runs the animation; Clear removes the boxes (wired up in factory-multiply.js). -->
+                            <div class="controls">
+                                <button id="factory-run" type="button">Start the Factory!</button>
+                                <button id="factory-reset" type="button" class="reset">Clear</button>
                             </div>
+                            <!-- Status message ("Loop 2 of 3...") shown while the factory runs. -->
+                            <div class="msg" id="factory-msg" aria-live="polite"></div>
+                            <div class="scene-wrap">
+                                <!-- The factory room; the JS adds the boxes here. -->
+                                <div class="scene" id="factory-scene">
+                                    <!-- Green machine holding the terminal. -->
+                                    <div class="machine">
+                                        <div class="machine-label">BOX MAKER</div>
+                                        <!-- Terminal: the FOR loop. factory-times = how many loops (columns),
+                                             factory-add = how many boxes added each loop (column height). -->
+                                        <div class="code">
+                                            <span class="kw">let</span> boxes = <span class="num">0</span>;<br />
+                                            <span class="kw">for</span> (<span class="kw">let</span> i = 0; i &lt; <input id="factory-times" type="number" min="1" max="10" value="3" aria-label="Number of loops (columns)" />; i++) {<br />
+                                            <span class="indent">boxes = boxes + <input id="factory-add" type="number" min="1" max="10" value="4" aria-label="Number to add each loop (column height)" />;</span><br />
+                                            }
+                                        </div>
+                                    </div>
+                                    <!-- Pipe the boxes slide through, then drop down onto the belt. -->
+                                    <div class="pipe"></div>
+                                    <!-- Color Machine changes the colors of the box columns. -->
+                                    <div class="color-machine" id="factory-color-machine">
+                                        <div class="color-machine-label">COLOR</div>
+                                    </div>
+                                    <!-- Conveyor belt that carries each finished column to the end. -->
+                                    <div class="belt"></div>
+                                    <!-- Floor where the columns land. -->
+                                    <div class="floor"></div>
+                                </div>
+                            </div>
+                            <!-- Running total shown as an addition, e.g. "total = 4 + 4 + 4 = 12". -->
+                            <div class="counter" id="factory-counter"></div>
                         </div>
-                        <!-- Running total shown as an addition, e.g. "total = 4 + 4 + 4 = 12". -->
-                        <div class="counter" id="factory-counter"></div>
-                    </div>
+                    </section>
 
                     <!-- Educator and parent notes now sit inside the container. -->
                     <div class="row" style="margin-top: 0;">
                         <section class="col-6 col-12-small">
                             <h2>Educators</h2>
-                            <p>Use the Box Factory to connect multiplication with repeated addition and loops. Ask students to predict the total, run the factory, and explain how the number of loops and boxes per loop affect the result.</p>
+                            <p>Use the factories to explore loops, conditionals, and multiplication. Ask students to predict what each program will do, then explain how the packages move through the machines.</p>
                         </section>
                         <section class="col-6 col-12-small">
                             <h2>Parents</h2>
-                            <p>Explore the Box Factory with your child. Try different numbers of loops and boxes, predict the total together, and count the boxes to see how repeated addition makes multiplication.</p>
+                            <p>Explore the factories with your child. Try different inputs, predict how the packages will be sorted or counted, and compare your predictions with what happens.</p>
                         </section>
                     </div>
                 </div>
@@ -129,6 +156,9 @@
         <script src="assets/js/util.js"></script>
         <script src="assets/js/main.js"></script>
         <script src="assets/js/sidebar-toggle.js"></script>
+        <script src="assets/js/factory-finfor.js"></script>
+        <script src="assets/js/factory-if.js"></script>
         <script src="assets/js/factory-multiply.js"></script>
+        <script src="assets/js/factory-fullscreen.js"></script>
     </body>
 </html>
